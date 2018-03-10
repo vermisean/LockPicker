@@ -21,7 +21,7 @@ public class Timer : MonoBehaviour
 		if(totalTime > 0.0f)
 		{
 			totalTime -= Time.deltaTime;
-			timeText.text = "Time Remaining: " + totalTime.ToString ("N0");
+			timeText.text = "Time: " + totalTime.ToString ("N0");
 		}
 
 		if(totalTime <= 0.0f)
