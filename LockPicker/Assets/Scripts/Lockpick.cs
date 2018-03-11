@@ -5,48 +5,77 @@ using UnityEngine.UI;
 
 public class Lockpick : MonoBehaviour 
 {
-	public float minRotation = 0.0f;
-	public float maxRotation = 180.0f;
-	public float currentRotation = 1.0f;
+	public Text successText = null;
+	public Slider successSlider = null;
+	public float timeRequired = 15.0f;
+	public float currentTime = 0.0f;
 
 	void Start () 
 	{
-		
+		successText.text = "";
+		currentTime = 0.0f;
+		GameManager.Difficulty difficulty = GameManager.GetDifficulty ();
+
+		switch(difficulty)
+		{
+		case GameManager.Difficulty.EASY:
+			timeRequired = 15.0f - GameManager.playerSkill * 5;
+			break;
+		case GameManager.Difficulty.MEDIUM:
+			timeRequired = 20.0f - GameManager.playerSkill * 5;
+			break;
+		case GameManager.Difficulty.HARD:
+			timeRequired = 25.0f - GameManager.playerSkill * 5;
+			break;
+		}
+
+		this.GetComponent<SpriteRenderer> ().color = Color.black;
 	}
-	
 
 	void Update () 
 	{
-		Debug.Log (Input.mousePosition);
+		successSlider.value = (currentTime / timeRequired) * 100;
+		MoveLockpick ();
+	}
+
+	void MoveLockpick()
+	{
 		Vector3 pos = Camera.main.WorldToScreenPoint(transform.position);
 		Vector3 dir = Input.mousePosition - pos;
 		float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
 
 		this.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-
-/*		if(Input.mousePosition.y >= 650.0f)
-		{
-			if(this.transform.rotation.z < 0.0f)
-			{
-				this.transform.rotation = Quaternion.Euler (0.0f, 0.0f, minRotation);
-				//this.transform.rotation.z = minRotation;
-			}
-			else if(this.transform.rotation.z > 180.0f)
-			{
-				this.transform.rotation = Quaternion.Euler (0.0f, 0.0f, maxRotation);
-				//this.transform.rotation.z = maxRotation;
-			}
-			else if(this.transform.rotation.z >= 0.0f && this.transform.rotation.z <= 180.0f)
-			{
-				this.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-			}
-		}*/
-
 	}
 
-	void MoveLockpick()
+	void OnTriggerEnter2D(Collider2D col)
 	{
-		
+		if(col.gameObject.tag == "shadow" && GameManager.gameNotOver)
+		{
+			this.GetComponent<SpriteRenderer> ().color = Color.white;
+		}
 	}
 
+	void OnTriggerStay2D(Collider2D col)
+	{
+		if(col.gameObject.tag == "shadow" && GameManager.gameNotOver)
+		{
+			if(currentTime <= timeRequired)
+			{
+				currentTime += Time.fixedDeltaTime;
+			}
+			else
+			{
+				GameManager.gameNotOver = false;
+				GameManager.GameWin (successText);
+			}
+		}
+	}
+
+	void OnTriggerExit2D(Collider2D col)
+	{
+		if(col.gameObject.tag == "shadow" && GameManager.gameNotOver)
+		{
+			this.GetComponent<SpriteRenderer> ().color = Color.black;
+		}
+	}
 }
