@@ -6,11 +6,15 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour 
 {
+	public AudioSource aSource = null;
+
 	public Text skillText = null;
 	public Text difficultyText = null;
 
 	public static bool gameNotOver;
-	public bool readytoLoad;
+	public bool readyToLoad;
+
+	public bool click = false;
 
 	public enum Difficulty
 	{
@@ -18,7 +22,7 @@ public class GameManager : MonoBehaviour
 		MEDIUM,
 		HARD
 	}
-	public static Difficulty difficulty;
+	public static Difficulty difficulty = Difficulty.EASY;
 
 	public static Difficulty GetDifficulty()
 	{
@@ -32,10 +36,13 @@ public class GameManager : MonoBehaviour
 	{
 		Cursor.visible = false;
 
-		readytoLoad = true;
+		aSource = GetComponent<AudioSource> ();
+		aSource.Play ();
+
+		readyToLoad = true;
 		gameNotOver = true;
 
-		difficulty = Difficulty.EASY;
+		//difficulty = Difficulty.EASY;
 
 		skillText.text = "Skill: " + playerSkill.ToString ();
 
@@ -49,22 +56,27 @@ public class GameManager : MonoBehaviour
 		
 	void Update()
 	{
-		if(!gameNotOver && readytoLoad)
+		if(!gameNotOver && readyToLoad)
 		{
-			readytoLoad = false;
+			readyToLoad = false;
 			StartCoroutine ("RestartLevel");
+		}
+
+		if(Input.GetKeyDown(KeyCode.Escape))
+		{
+			Application.Quit ();
 		}
 	}
 
 
 	public static void GameWin(Text successText)
 	{
-		successText.text = "SUCCESS";
+		successText.text = "DATA ACCESSED";
 	}
 
 	public static void GameOver(Text successText)
 	{
-		successText.text = "FAILURE";
+		successText.text = "SECURITY BREACH DETECTED";
 	}
 
 	public IEnumerator RestartLevel()
@@ -73,20 +85,20 @@ public class GameManager : MonoBehaviour
 		if(difficulty == Difficulty.EASY)
 		{
 			playerSkill += 1;
-			if (playerSkill == 3)
+			if (playerSkill == 2)
 				difficulty = Difficulty.MEDIUM;
 			SceneManager.LoadScene ("Main");
 		}
 		else if(difficulty == Difficulty.MEDIUM)
 		{
 			playerSkill += 1;
-			if (playerSkill == 5)
+			if (playerSkill == 4)
 				difficulty = Difficulty.HARD;
 			SceneManager.LoadScene ("Main");
 		}
 		else if(difficulty == Difficulty.HARD)
 		{
-			playerSkill += 3;
+			playerSkill += 2;
 			SceneManager.LoadScene ("Main");
 		}
 	}
