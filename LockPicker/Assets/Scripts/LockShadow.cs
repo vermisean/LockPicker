@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class LockShadow : MonoBehaviour 
 {
+	public AudioSource aSource = null;
+	public AudioClip beep = null;
+
 	public GameManager gameManager;
 
 	private bool canChangeDirection;
@@ -15,6 +18,7 @@ public class LockShadow : MonoBehaviour
 
 	void Start () 
 	{
+		aSource = GetComponent<AudioSource> ();
 		canRotate = true;
 		gameManager = FindObjectOfType<GameManager> ();
 
@@ -58,6 +62,8 @@ public class LockShadow : MonoBehaviour
 
 				if(coolDownTimer >= changeTime)
 				{
+					aSource.PlayOneShot (beep, 1.0f);
+
 					if(GameManager.difficulty == GameManager.Difficulty.MEDIUM)
 					{
 						changeTime = Random.Range (5.0f, 10.0f);

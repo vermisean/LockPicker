@@ -5,13 +5,23 @@ using UnityEngine.UI;
 
 public class Lockpick : MonoBehaviour 
 {
+	public AudioSource aSource = null;
+	public AudioClip success = null;
+
 	public Text successText = null;
 	public Slider successSlider = null;
 	public float timeRequired = 15.0f;
 	public float currentTime = 0.0f;
 
+	private bool OnTarget = false;
+	private bool doOnce = false;
+
 	void Start () 
 	{
+		aSource = GetComponent<AudioSource> ();
+
+		doOnce = false;
+
 		successText.text = "";
 		currentTime = 0.0f;
 		GameManager.Difficulty difficulty = GameManager.GetDifficulty ();
@@ -19,23 +29,28 @@ public class Lockpick : MonoBehaviour
 		switch(difficulty)
 		{
 		case GameManager.Difficulty.EASY:
-			timeRequired = 15.0f - GameManager.playerSkill * 5;
+			timeRequired = 15.0f - GameManager.playerSkill * 1.5f;
 			break;
 		case GameManager.Difficulty.MEDIUM:
-			timeRequired = 20.0f - GameManager.playerSkill * 5;
+			timeRequired = 20.0f - GameManager.playerSkill * 1.5f;
 			break;
 		case GameManager.Difficulty.HARD:
-			timeRequired = 25.0f - GameManager.playerSkill * 5;
+			timeRequired = 25.0f - GameManager.playerSkill * 1.5f;
 			break;
 		}
 
-		this.GetComponent<SpriteRenderer> ().color = Color.black;
+		this.GetComponent<SpriteRenderer> ().color = Color.red;
 	}
 
 	void Update () 
 	{
 		successSlider.value = (currentTime / timeRequired) * 100;
 		MoveLockpick ();
+
+		if(currentTime <= timeRequired && currentTime > 0.0f && !OnTarget)
+		{
+			currentTime -= Time.fixedDeltaTime / 2.0f;
+		}
 	}
 
 	void MoveLockpick()
@@ -51,8 +66,9 @@ public class Lockpick : MonoBehaviour
 	{
 		if(col.gameObject.tag == "shadow" && GameManager.gameNotOver)
 		{
-			this.GetComponent<SpriteRenderer> ().color = Color.white;
+			this.GetComponent<SpriteRenderer> ().color = Color.green;
 		}
+		OnTarget = true;
 	}
 
 	void OnTriggerStay2D(Collider2D col)
@@ -65,6 +81,11 @@ public class Lockpick : MonoBehaviour
 			}
 			else
 			{
+				if(!doOnce)
+				{
+					doOnce = true;
+					aSource.PlayOneShot (success, 1.0f);
+				}
 				GameManager.gameNotOver = false;
 				GameManager.GameWin (successText);
 			}
@@ -75,7 +96,9 @@ public class Lockpick : MonoBehaviour
 	{
 		if(col.gameObject.tag == "shadow" && GameManager.gameNotOver)
 		{
-			this.GetComponent<SpriteRenderer> ().color = Color.black;
+			this.GetComponent<SpriteRenderer> ().color = Color.red;
 		}
+
+		OnTarget = false;
 	}
 }

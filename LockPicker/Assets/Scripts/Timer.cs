@@ -5,14 +5,21 @@ using UnityEngine.UI;
 
 public class Timer : MonoBehaviour 
 {
+	public AudioSource aSource = null;
+	public AudioClip failure = null;
+
 	public Text timeText = null;
 	public Text failText = null;
 
 	private float totalTime = 60.0f;
-
+	private bool doOnce = false;
 
 	void Start () 
 	{
+		doOnce = false;
+
+		aSource = GetComponent<AudioSource> ();
+		
 		failText.text = "";
 
 		GameManager.Difficulty difficulty = GameManager.GetDifficulty ();
@@ -45,6 +52,12 @@ public class Timer : MonoBehaviour
 
 		if(totalTime <= 0.0f)
 		{
+			if(!doOnce)
+			{
+				doOnce = true;
+				aSource.PlayOneShot (failure, 1.0f);
+			}
+
 			GameManager.gameNotOver = false;
 			GameManager.GameOver (failText);
 		}
